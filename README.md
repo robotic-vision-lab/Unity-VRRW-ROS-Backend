@@ -32,8 +32,7 @@ user@DESKTOP:~$ cd VRRW-ROS
 2. Build or pull the Docker image:
 
 ```console
-user@DESKTOP:~$ cd docker
-user@DESKTOP:~$ ./build_image.sh
+user@DESKTOP:~$ docker pull mqt0029/robosim:noetic
 ```
 
 3. Run the Docker container:

@@ -11,8 +11,7 @@ HOST_CATKIN_WS=$( cd "${SCRIPT_DIR}/../catkin_ws/src" &> /dev/null && pwd )
 CONTAINER_NAME=unity-vrrw-ROS-side-container
 
 # docker image and tag to use
-IMAGE_NAME=robosim
-IMAGE_TAG=noetic-desktop-focal
+DOCKER_IMAGE=mqt0029/robosim:noetic
 
 # get docker container ID if exists
 CONTAINER_ID=`docker ps -aqf "name=^/${CONTAINER_NAME}$"`
@@ -22,16 +21,15 @@ if [ -z "${CONTAINER_ID}" ]; then
 
     # creating the docker container
     docker run \
-    --gpus all \
     --tty \
     --detach \
     --privileged \
-    --network host \
+    --publish 10000:10000 \
     --name ${CONTAINER_NAME} \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v ${HOST_CATKIN_WS}:/root/catkin_ws/src \
-    ${IMAGE_NAME}:${IMAGE_TAG}
+    ${DOCKER_IMAGE}
 
 else
 

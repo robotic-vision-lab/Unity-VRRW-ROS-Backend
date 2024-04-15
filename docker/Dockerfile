@@ -1,15 +1,11 @@
-# using stock Ubuntu 20.04 image
-FROM ubuntu:focal
+# using OSRF ROS Noetic 
+FROM osrf/ros:noetic-desktop-full-focal
 
 # no prompts from apt-get
 ARG DEBIAN_FRONTEND=noninteractive
 
 # use bash as primary shell for RUN commands
 SHELL [ "/bin/bash", "-c" ]
-
-# "fast" source list for my area
-# NOTE: can be redundant or negatively affect download speed!
-RUN sed -i -r 's,http://(.*).ubuntu.com,http://mirror.us-tx.kamatera.com,' /etc/apt/sources.list
 
 # installing initial setup packages
 RUN apt-get update && apt-get -y --no-install-recommends install \
@@ -38,10 +34,8 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     && apt-get -y autoremove \
     && apt-get clean
 
-# installing ROS1 Noetic Desktop Full
-RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \
-    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add - && \
-    apt-get update && apt-get -y --no-install-recommends install \
+# installing ROS dependencies
+RUN apt-get update && apt-get -y --no-install-recommends install \
     ros-noetic-desktop-full \
     ros-noetic-moveit \
     ros-noetic-moveit-resources \
@@ -83,7 +77,8 @@ ENV TERM xterm-256color
 
 # setup catkin workspace
 # https://wiki.ros.org/rosdep
-RUN rosdep init && \
+RUN rm -f /etc/ros/rosdep/sources.list.d/20-default.list && \
+    rosdep init && \
     rosdep update && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
     mkdir -p ${CATKIN_SRC} && \
@@ -91,12 +86,6 @@ RUN rosdep init && \
     catkin init && \
     rosdep install --from-paths src --ignore-src -r -y && \
     catkin build --cmake-args -DCMAKE_BUILD_TYPE=Release
-
-# see https://wiki.ros.org/docker/Tutorials/Hardware%20Acceleration#nvidia-docker2
-ENV NVIDIA_VISIBLE_DEVICES \
-    ${NVIDIA_VISIBLE_DEVICES:-all}
-ENV NVIDIA_DRIVER_CAPABILITIES \
-    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
 
 # convenient aliases
 COPY .bash_aliases /root/.bash_aliases

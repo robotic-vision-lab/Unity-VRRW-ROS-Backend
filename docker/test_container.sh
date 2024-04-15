@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-# Docker image and tag to use
-IMAGE_NAME=robosim
-IMAGE_TAG=noetic-desktop-focal
+# docker image and tag to use
+DOCKER_IMAGE=mqt0029/robosim:noetic
 
 # get the full path of the script parent directory
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -17,10 +16,9 @@ docker run \
 --interactive \
 --rm \
 --privileged \
---gpus all \
---network host \
+--publish 10000:10000 \
 -e DISPLAY=$DISPLAY \
 -v /tmp/.X11-unix:/tmp/.X11-unix \
 -v ${HOST_CATKIN_WS}:/root/catkin_ws/src \
-${IMAGE_NAME}:${IMAGE_TAG} \
+${DOCKER_IMAGE} \
 bash
